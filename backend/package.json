@@ -4,8 +4,20 @@
   "description": "Apollo-Server GraphQL API",
   "main": "index.js",
   "scripts": {
+    "mongod": "mongod --dbpath /data/shield/db --auth",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "MG",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.6.9",
+    "apollo-server-express": "^2.6.9",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.4",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "graphql": "^14.4.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.6.4"
+  }
 }
