@@ -6,7 +6,12 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 
 // Helpers
-const { connect, startServer } = require('./helpers');
+const {
+  connect,
+  createCache,
+  getRolesWithPermissionNames,
+  startServer,
+} = require('./helpers');
 
 // Express App
 const app = express();
@@ -20,16 +25,28 @@ const corsConfig = {
   credentials: true,
 };
 
-// Connect to DB and start server
-connect(process.env.DB_URI).then((database) => {
-  startServer(app, {
-    host: process.env.HOST,
-    port: process.env.PORT,
-    nodeEnv: process.env.NODE_ENV,
-    db: database,
-    cors: corsConfig,
+async function initialize(uri) {
+  // connect to DB
+  connect(uri).then((db) => {
+    getRolesWithPermissionNames().catch(err => console.error(err)).then((roles) => {
+      console.log(roles);
+      const cache = createCache();
+      cache.set('roles', roles);
+
+      // start server
+      startServer(app, {
+        host: process.env.HOST,
+        port: process.env.PORT,
+        nodeEnv: process.env.NODE_ENV,
+        db,
+        cors: corsConfig,
+        cache,
+      });
+    });
   });
-});
+}
+
+initialize(process.env.DB_URI).catch(err => console.error(err));
 
 // Exception Handling
 process.on('unhandledRejection', (reason, p) => {
