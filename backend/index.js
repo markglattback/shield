@@ -21,7 +21,7 @@ app.use(cookieParser(process.env.SECRET)); // sign cookies using env SECRET
 
 // CORS Setup
 const corsConfig = {
-  origin: 'localhost:3000',
+  origin: 'http://localhost:3000',
   credentials: true,
 };
 
