@@ -55,7 +55,7 @@ async function getRolesWithPermissionNames() {
     const obj = {};
 
     result.forEach((role) => {
-      obj[`${role.name}`] = role;
+      obj[`${role.id}`] = role;
     });
 
     return obj;

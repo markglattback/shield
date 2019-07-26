@@ -8,17 +8,14 @@ const _withAuth = WrappedComponent => class withAuth extends Component {
   static displayname = `withAuth(${getDisplayName(WrappedComponent)})`;
 
   static async getInitialProps(ctx) {
-    const { jwt } = cookies(ctx);
+    const { token } = cookies(ctx);
+    const { pathname, query } = ctx;
+    console.log('pathname: ', pathname);
+    console.log('query: ', query);
 
-    // SSR auth check only takes place on initial page load
-    /*
-      Questions:
-      What if token expires
-      What if token is blacklisted
-      
-    */
-    if (ctx.req && !jwt) {
-      // redirect to login page if no jwt present
+    // Server side only
+    if (ctx.req && !token) {
+      // redirect to login page if no token present
       ctx.res.writeHead(302, { Location: '/login' });
       ctx.res.end();
     }

@@ -64,7 +64,7 @@ const LOGIN = async (parent, { email, password }, { res }) => {
   const token = jwt.sign({ id: user.id, roles: user.roles, name: user.firstName }, process.env.SECRET);
 
   // attach token cookie to respons
-  res.cookie('jwt', token, {
+  res.cookie('token', token, {
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
   });

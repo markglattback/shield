@@ -1,8 +1,7 @@
 import React from 'react';
 import App, { Container } from 'next/app';
 import { ApolloProvider } from 'react-apollo';
-import withApollo from '../lib/withApollo';
-import gql from 'graphql-tag';
+import withApollo from '../lib/with-apollo-client';
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }) {
@@ -16,13 +15,11 @@ class MyApp extends App {
   }
 
   render() {
-    const { Component, pageProps, apollo } = this.props;
-
-    console.log(apollo.cache);
+    const { Component, pageProps, apolloClient } = this.props;
 
     return (
       <Container>
-        <ApolloProvider client={apollo}>
+        <ApolloProvider client={apolloClient}>
           <Component {...pageProps} />
         </ApolloProvider>
       </Container>

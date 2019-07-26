@@ -4,6 +4,7 @@ require('dotenv').config();
 // Server Dependencies
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const getUser = require('./middleware/getUser');
 
 // Helpers
 const {
@@ -18,6 +19,7 @@ const app = express();
 
 // Middleware
 app.use(cookieParser(process.env.SECRET)); // sign cookies using env SECRET
+app.use(getUser);
 
 // CORS Setup
 const corsConfig = {

@@ -22,10 +22,11 @@ class AuthDirective extends SchemaDirectiveVisitor {
       let valid = false;
 
       const cachedRoles = cache.get('roles');
+      console.log(cachedRoles);
 
       roles.forEach((role) => {
         if (valid) return;
-
+        console.log(role);
         if (cachedRoles[`${role}`].permissions.includes(permission)) {
           valid = true;
         }
