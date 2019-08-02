@@ -13,7 +13,11 @@ class AuthDirective extends SchemaDirectiveVisitor {
     field.resolve = async function resolver(...args) {
       const [, , ctx] = args;
       const { req: { user }, cache } = ctx;
+      console.log('Auth directive - user: ', user);
       if (!user) throw new AuthenticationError('You must be logged in to view this content');
+     
+      // const blacklist = cache.get('blacklist');
+      // if (blacklist.includes(user.id)) throw new ForbiddenError('You are not authorized to view this content');
 
       // check permissions
       const { roles } = user;
@@ -22,11 +26,10 @@ class AuthDirective extends SchemaDirectiveVisitor {
       let valid = false;
 
       const cachedRoles = cache.get('roles');
-      console.log(cachedRoles);
 
       roles.forEach((role) => {
         if (valid) return;
-        console.log(role);
+
         if (cachedRoles[`${role}`].permissions.includes(permission)) {
           valid = true;
         }

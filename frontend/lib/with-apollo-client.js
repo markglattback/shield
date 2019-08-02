@@ -13,17 +13,25 @@ export default App => class Apollo extends React.Component {
   }
 
   static async getInitialProps(ctx) {
-    const { Component, router } = ctx;
+    const { Component, router, ctx: context } = ctx;
+    const { req, res } = context;
+    
+    // We need to pass cookies manually to node-fetch during SSR
+    let cookies;
+    if (req) {
+      cookies = req.headers.cookie;
+    }
 
     // Get initial props for _app.js
     let appProps = {};
     if (App.getInitialProps) {
       appProps = await App.getInitialProps(ctx);
     }
-
+    
     // Run all GraphQL queries in the component tree
     // and extract data to populate apollo cache
-    const apollo = initApollo();
+    const apollo = initApollo({}, { cookies });
+    // SSR only
     if (typeof window === 'undefined') {
       try {
         // Run all GraphQL queries
@@ -38,7 +46,13 @@ export default App => class Apollo extends React.Component {
       } catch (error) {
         // Prevent Apollo Client GraphQL errors from crashing SSR.
         // Handle them in components via the data.error prop or in onError link
-        console.error('Error while running `getDataFromTree`', error);
+        if (error.message === 'GraphQL error: You must be logged in to view this content') {
+          console.log('Redirecting to login');
+          res.writeHead(302, { location: '/login' });
+          res.end();
+        } else {
+          console.error('Error while running `getDataFromTree`', error);
+        }
       }
 
       // getDataFromTree does not call componentWillUnmount

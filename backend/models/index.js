@@ -53,6 +53,11 @@ const userSchema = new Schema({
     required: true,
     default: [],
   },
+  blacklisted: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema, 'users');

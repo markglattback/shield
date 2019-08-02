@@ -3,6 +3,19 @@ const { gql } = require('apollo-server');
 const typeDefs = gql`
   directive @auth(permission: String) on FIELD | FIELD_DEFINITION
 
+  scalar Date
+
+  input BlacklistInput {
+    user: ID!
+    reason: String!
+    expires: Boolean!
+    expiresOn: Date
+  }
+
+  type Message {
+    message: String!
+  }
+
   type Permission {
     id: ID!
     name: String!
@@ -39,6 +52,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    BLACKLIST_USER(data: BlacklistInput!): Message
     CREATE_PERMISSION(name: String!, roles: [ID]): Permission @auth(permission: "PERMISSIONS_ADMIN")
     CREATE_ROLE(name: String!, permissions: [ID]): Role
     CREATE_USER(data: UserInput!): User

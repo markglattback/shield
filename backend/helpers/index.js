@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const NodeCache = require('node-cache');
 const { createApolloServer } = require('../apollo');
-const { Role, Permission } = require('../models');
+const { Blacklist, Role, Permission, User } = require('../models');
 
 function startServer(app, {
   apiURL = '/graphql',
@@ -64,9 +64,15 @@ async function getRolesWithPermissionNames() {
   return addNames();
 }
 
+async function createBlacklist() {
+  const users = await User.find({ blacklisted: true });
+  return users.map(user => user.id.toString());
+}
+
 module.exports = {
   connect,
   createCache,
+  createBlacklist,
   getRolesWithPermissionNames,
   startServer,
 };

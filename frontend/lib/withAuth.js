@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import cookies from 'next-cookies';
+import Router from 'next/router';
 
 // Gets the display name of a JSX component for dev tools
 const getDisplayName = WrappedComponent => WrappedComponent.displayName || WrappedComponent.name || 'Component';
@@ -9,9 +10,6 @@ const _withAuth = WrappedComponent => class withAuth extends Component {
 
   static async getInitialProps(ctx) {
     const { token } = cookies(ctx);
-    const { pathname, query } = ctx;
-    console.log('pathname: ', pathname);
-    console.log('query: ', query);
 
     // Server side only
     if (ctx.req && !token) {
@@ -24,9 +22,18 @@ const _withAuth = WrappedComponent => class withAuth extends Component {
 
     return { ...componentProps };
   }
-    
+
+  handleError = (error) => {
+    // redirect if UNAUTHENTICATED
+    if (error.message === 'GraphQL error: You must be logged in to view this content') {
+      if (typeof window !== 'undefined') {
+        Router.push('/login');
+      }
+    }
+  }
+
   render() {
-    return <WrappedComponent {...this.props} />;
+    return <WrappedComponent {...this.props} onError={this.handleError} />;
   }
 };
 

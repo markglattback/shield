@@ -10,13 +10,15 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return initApollo; });
-/* harmony import */ var apollo_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! apollo-client */ "./node_modules/apollo-client/bundle.esm.js");
-/* harmony import */ var apollo_cache_inmemory__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! apollo-cache-inmemory */ "./node_modules/apollo-cache-inmemory/lib/bundle.esm.js");
-/* harmony import */ var apollo_link_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! apollo-link-http */ "./node_modules/apollo-link-http/lib/bundle.esm.js");
-/* harmony import */ var apollo_link_error__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! apollo-link-error */ "./node_modules/apollo-link-error/lib/bundle.esm.js");
-/* harmony import */ var apollo_link__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! apollo-link */ "./node_modules/apollo-link/lib/bundle.esm.js");
-/* harmony import */ var isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! isomorphic-unfetch */ "./node_modules/isomorphic-unfetch/browser.js");
-/* harmony import */ var isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _babel_runtime_corejs2_helpers_esm_objectSpread__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime-corejs2/helpers/esm/objectSpread */ "./node_modules/@babel/runtime-corejs2/helpers/esm/objectSpread.js");
+/* harmony import */ var apollo_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! apollo-client */ "./node_modules/apollo-client/bundle.esm.js");
+/* harmony import */ var apollo_cache_inmemory__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! apollo-cache-inmemory */ "./node_modules/apollo-cache-inmemory/lib/bundle.esm.js");
+/* harmony import */ var apollo_link_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! apollo-link-http */ "./node_modules/apollo-link-http/lib/bundle.esm.js");
+/* harmony import */ var apollo_link_error__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! apollo-link-error */ "./node_modules/apollo-link-error/lib/bundle.esm.js");
+/* harmony import */ var apollo_link__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! apollo-link */ "./node_modules/apollo-link/lib/bundle.esm.js");
+/* harmony import */ var isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! isomorphic-unfetch */ "./node_modules/isomorphic-unfetch/browser.js");
+/* harmony import */ var isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_6__);
+
 
 
 
@@ -25,42 +27,67 @@ __webpack_require__.r(__webpack_exports__);
 
 var apolloClient = null;
 
-function create(initialState) {
+function create(initialState, _ref) {
+  var cookies = _ref.cookies;
   // initialState is the cache data returned from Apollo's getDataFromTree
   var isBrowser = "object" !== 'undefined';
-  var cache = new apollo_cache_inmemory__WEBPACK_IMPORTED_MODULE_1__["InMemoryCache"]().restore(initialState || {});
-  return new apollo_client__WEBPACK_IMPORTED_MODULE_0__["ApolloClient"]({
+  var cache = new apollo_cache_inmemory__WEBPACK_IMPORTED_MODULE_2__["InMemoryCache"]().restore(initialState || {});
+  return new apollo_client__WEBPACK_IMPORTED_MODULE_1__["ApolloClient"]({
     connectToDevTools: isBrowser,
     ssrMode: !isBrowser,
-    link: apollo_link__WEBPACK_IMPORTED_MODULE_4__["ApolloLink"].from([Object(apollo_link_error__WEBPACK_IMPORTED_MODULE_3__["onError"])(function (_ref) {
-      var response = _ref.response,
-          graphQLErrors = _ref.graphQLErrors,
-          networkError = _ref.networkError;
+    link: apollo_link__WEBPACK_IMPORTED_MODULE_5__["ApolloLink"].from([Object(apollo_link_error__WEBPACK_IMPORTED_MODULE_4__["onError"])(function (_ref2) {
+      var operation = _ref2.operation,
+          response = _ref2.response,
+          graphQLErrors = _ref2.graphQLErrors,
+          networkError = _ref2.networkError;
 
       if (graphQLErrors) {
-        console.log(response); // logout client on unauthenticated
+        // logout client on unauthenticated
+        graphQLErrors.forEach(function (error) {
+          if (error.extensions.code === 'UNAUTHENTICATED') {// todo
+          }
+        });
       }
 
-      if (networkError) {
-        console.log(networkError); // todo
+      if (networkError) {// todo
       }
-    }), new apollo_link_http__WEBPACK_IMPORTED_MODULE_2__["HttpLink"]({
+    }), new apollo_link__WEBPACK_IMPORTED_MODULE_5__["ApolloLink"](function (operation, forward) {
+      operation.setContext(function (_ref3) {
+        var headers = _ref3.headers;
+        if (!cookies) return {
+          headers: headers
+        };
+        return {
+          headers: Object(_babel_runtime_corejs2_helpers_esm_objectSpread__WEBPACK_IMPORTED_MODULE_0__["default"])({}, headers, {
+            Cookie: cookies
+          })
+        };
+      });
+      return forward(operation);
+    }), new apollo_link_http__WEBPACK_IMPORTED_MODULE_3__["HttpLink"]({
       uri: 'http://localhost:1989/graphql',
       credentials: 'include',
-      fetch: !isBrowser && isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_5___default.a
+      fetch: !isBrowser && isomorphic_unfetch__WEBPACK_IMPORTED_MODULE_6___default.a
     })]),
-    cache: cache
+    cache: cache,
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'cache-and-network'
+      }
+    }
   });
 }
 
 function initApollo(initialState) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
   // Make sure to create a new client for every server-side request so that data
   // isn't shared between connections
   if (false) {} // Reuse client on the client-side
 
 
   if (!apolloClient) {
-    apolloClient = create(initialState);
+    apolloClient = create(initialState, options);
   }
 
   return apolloClient;
@@ -135,7 +162,7 @@ var _jsxFileName = "C:\\apps\\shield\\frontend\\lib\\with-apollo-client.js";
           apolloClient: this.apolloClient,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 59
+            lineNumber: 73
           },
           __self: this
         }));
@@ -146,78 +173,95 @@ var _jsxFileName = "C:\\apps\\shield\\frontend\\lib\\with-apollo-client.js";
         var _getInitialProps = Object(_babel_runtime_corejs2_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])(
         /*#__PURE__*/
         _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(ctx) {
-          var Component, router, appProps, apollo, apolloState;
+          var Component, router, context, req, res, cookies, appProps, apollo, apolloState;
           return _babel_runtime_corejs2_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
             while (1) {
               switch (_context.prev = _context.next) {
                 case 0:
-                  Component = ctx.Component, router = ctx.router; // Get initial props for _app.js
+                  Component = ctx.Component, router = ctx.router, context = ctx.ctx;
+                  req = context.req, res = context.res; // We need to pass cookies manually to node-fetch during SSR
+
+                  if (req) {
+                    cookies = req.headers.cookie;
+                  } // Get initial props for _app.js
+
 
                   appProps = {};
 
                   if (!App.getInitialProps) {
-                    _context.next = 6;
+                    _context.next = 8;
                     break;
                   }
 
-                  _context.next = 5;
+                  _context.next = 7;
                   return App.getInitialProps(ctx);
 
-                case 5:
+                case 7:
                   appProps = _context.sent;
 
-                case 6:
+                case 8:
                   // Run all GraphQL queries in the component tree
                   // and extract data to populate apollo cache
-                  apollo = Object(_init_apollo__WEBPACK_IMPORTED_MODULE_13__["default"])();
+                  apollo = Object(_init_apollo__WEBPACK_IMPORTED_MODULE_13__["default"])({}, {
+                    cookies: cookies
+                  }); // SSR only
 
                   if (true) {
-                    _context.next = 17;
+                    _context.next = 19;
                     break;
                   }
 
-                  _context.prev = 8;
-                  _context.next = 11;
+                  _context.prev = 10;
+                  _context.next = 13;
                   return Object(react_apollo__WEBPACK_IMPORTED_MODULE_12__["getDataFromTree"])(react__WEBPACK_IMPORTED_MODULE_10___default.a.createElement(App, Object(_babel_runtime_corejs2_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, appProps, {
                     Component: Component,
                     router: router,
                     apolloClient: apollo,
                     __source: {
                       fileName: _jsxFileName,
-                      lineNumber: 31
+                      lineNumber: 39
                     },
                     __self: this
                   })));
 
-                case 11:
-                  _context.next = 16;
+                case 13:
+                  _context.next = 18;
                   break;
 
-                case 13:
-                  _context.prev = 13;
-                  _context.t0 = _context["catch"](8);
+                case 15:
+                  _context.prev = 15;
+                  _context.t0 = _context["catch"](10);
+
                   // Prevent Apollo Client GraphQL errors from crashing SSR.
                   // Handle them in components via the data.error prop or in onError link
-                  console.error('Error while running `getDataFromTree`', _context.t0);
+                  if (_context.t0.message === 'GraphQL error: You must be logged in to view this content') {
+                    console.log('Redirecting to login');
+                    res.writeHead(302, {
+                      location: '/login'
+                    });
+                    res.end();
+                  } else {
+                    console.error('Error while running `getDataFromTree`', _context.t0);
+                  }
 
-                case 16:
+                case 18:
                   // getDataFromTree does not call componentWillUnmount
                   // head side effect therefore need to be cleared manually
                   next_head__WEBPACK_IMPORTED_MODULE_11___default.a.rewind();
 
-                case 17:
+                case 19:
                   // Extract query data from the Apollo store
                   apolloState = apollo.cache.extract();
                   return _context.abrupt("return", Object(_babel_runtime_corejs2_helpers_esm_objectSpread__WEBPACK_IMPORTED_MODULE_1__["default"])({}, appProps, {
                     apolloState: apolloState
                   }));
 
-                case 19:
+                case 21:
                 case "end":
                   return _context.stop();
               }
             }
-          }, _callee, this, [[8, 13]]);
+          }, _callee, this, [[10, 15]]);
         }));
 
         function getInitialProps(_x) {

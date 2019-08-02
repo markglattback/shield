@@ -1,17 +1,17 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { ApolloError, AuthenticationError } = require('apollo-server');
-const { Permission, Role, User } = require('../../models');
+const { Blacklist, Permission, Role, User } = require('../../models');
 
-/*
+const BLACKLIST_USER = async (parent, { data }, { cache }) => {
+  const user = Blacklist.create(data);
+  // update cache
+  const blacklist = cache.get('blacklist');
+  blacklist.push(user);
+  cache.set('blacklist', blacklist);
 
-CREATE_PERMISSION
-
-CREATE_ROLE
-
-add some of the above to the database
-
-*/
+  return { message: 'User blacklisted successfully.' };
+};
 
 const CREATE_PERMISSION = async (parent, { name }) => Permission.create({ name });
 
@@ -54,7 +54,7 @@ const CREATE_USER = async (parent, { data }) => {
 const LOGIN = async (parent, { email, password }, { res }) => {
   // retrieve user from database
   const user = await User.findOne({ email });
-  if (!user) throw new AuthenticationError('Authentication unsuccessful');
+  if (!user || user.blacklisted) throw new AuthenticationError('Authentication unsuccessful');
 
   // check password
   const valid = await bcrypt.compare(password, user.password);
@@ -74,6 +74,7 @@ const LOGIN = async (parent, { email, password }, { res }) => {
 };
 
 module.exports = {
+  BLACKLIST_USER,
   CREATE_PERMISSION,
   CREATE_ROLE,
   CREATE_USER,

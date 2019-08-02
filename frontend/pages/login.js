@@ -25,6 +25,7 @@ class Login extends Component {
   state = {
     email: '',
     password: '',
+    message: '',
   }
 
   handleChange = ({ target: { name, value } }) => {
@@ -33,12 +34,21 @@ class Login extends Component {
     });
   }
 
+  handleError = (error) => {
+    if (error.message === 'GraphQL error: Authentication unsuccessful') {
+      this.setState({
+        message: 'There was a problem.'
+      });
+    }
+  }
+
   render() {
     const { state: { email, password } } = this;
 
     return (
       <Mutation
         mutation={LOGIN}
+        onError={this.handleError}
         update={(cache, { data: { LOGIN: login } }) => {
           console.log(login);
           cache.writeQuery({
@@ -46,7 +56,6 @@ class Login extends Component {
             data: login,
           });
 
-          console.log(Router);
           Router.push('/');
         }}
       >
@@ -63,6 +72,7 @@ class Login extends Component {
               <input type="password" name="password" onChange={this.handleChange} value={password} />
               <button type="submit">Login</button>
             </form>
+            {this.state.message && <p>{this.state.message}</p>}
           </div>
         )}
       </Mutation>
