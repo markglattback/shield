@@ -10,7 +10,7 @@
   "author": "MG",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "^2.6.9",
+    "apollo-server": "^2.25.4",
     "apollo-server-express": "^2.6.9",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.4",
